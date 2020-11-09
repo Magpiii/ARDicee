@@ -15,6 +15,7 @@
 		5A4C3D5D2559CE2A00B1DE9A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5A4C3D5B2559CE2A00B1DE9A /* LaunchScreen.storyboard */; };
 		5A4C3D682559CE2A00B1DE9A /* ARDiceeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4C3D672559CE2A00B1DE9A /* ARDiceeTests.swift */; };
 		5A4C3D732559CE2B00B1DE9A /* ARDiceeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4C3D722559CE2B00B1DE9A /* ARDiceeUITests.swift */; };
+		5A4C3D842559CEE500B1DE9A /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5A4C3D832559CEE500B1DE9A /* Secrets.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		5A4C3D6E2559CE2B00B1DE9A /* ARDiceeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ARDiceeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A4C3D722559CE2B00B1DE9A /* ARDiceeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDiceeUITests.swift; sourceTree = "<group>"; };
 		5A4C3D742559CE2B00B1DE9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5A4C3D832559CEE500B1DE9A /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 				5A4C3D592559CE2A00B1DE9A /* Assets.xcassets */,
 				5A4C3D5B2559CE2A00B1DE9A /* LaunchScreen.storyboard */,
 				5A4C3D5E2559CE2A00B1DE9A /* Info.plist */,
+				5A4C3D832559CEE500B1DE9A /* Secrets.plist */,
 			);
 			path = ARDicee;
 			sourceTree = "<group>";
@@ -232,6 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A4C3D532559CE2900B1DE9A /* art.scnassets in Resources */,
+				5A4C3D842559CEE500B1DE9A /* Secrets.plist in Resources */,
 				5A4C3D5D2559CE2A00B1DE9A /* LaunchScreen.storyboard in Resources */,
 				5A4C3D5A2559CE2A00B1DE9A /* Assets.xcassets in Resources */,
 				5A4C3D582559CE2900B1DE9A /* Main.storyboard in Resources */,
