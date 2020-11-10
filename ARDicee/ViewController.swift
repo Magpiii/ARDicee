@@ -124,6 +124,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
     
+    func rollAll() {
+        //If diceArray isn't empty...
+        if !diceArray.isEmpty {
+            //Rolls each dice in the diceArray:
+            for dice in diceArray{
+                roll(dice: dice)
+            }
+            
+        }
+    }
+    
     @IBAction func rollAgain(_ sender: UIBarButtonItem) {
         //Rolls all dice once the barButton item is pressed:
         rollAll()
@@ -171,40 +182,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             */
             if let hitResult = results.first{
                 print(hitResult)
-                
-                //Initializes a new scene with the filepath of the dice object:
-                let diceScene = SCNScene(named: "art.scnassets/diceeColada copy.scn")
-                
-                /*Initializes the node of the dice object to the node of the dice object in the scene tree (NOTE: "recursively" parameter is a bool for whether or not you wnat to include every single other object in the tree for the scene):
-                */
-                if let diceNode = diceScene?.rootNode.childNode(withName: "Dice", recursively: true){
-                
-                /*Sets the diceNode's position as the position (which is the number 3 after ".columns") of the x, y, and z components of the hitTest result (NOTE: the radius of the diceNode is added to the y parameter, otherwise half of the dice object will be sunk into the plane instead of the dice appearing above the plane):
-                */
-                    diceNode.position = SCNVector3(x: hitResult.worldTransform.columns.3.x, y: (hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius), z: hitResult.worldTransform.columns.3.z)
-                    
-                    //Appends the diceNode to the array of diceNodes:
-                    diceArray.append(diceNode)
-                    
-                    //Adds the diceNode to the rootNode of the sceneView:
-                    sceneView.scene.rootNode.addChildNode(diceNode)
-                    
-                    roll(dice: diceNode)
+                    addDice(at: hitResult)
         }
     }
 }
-}
-            
-    func rollAll() {
-        //If diceArray isn't empty...
-        if !diceArray.isEmpty {
-            //Rolls each dice in the diceArray:
-            for dice in diceArray{
-                roll(dice: dice)
-            }
-            
-        }
-    }
+    
+    //MARK: - Dice Manipulation:
     
     func roll(dice: SCNNode) {
         /*Creates a new constant x equal to a random dice face between 1 and 4 and multiplies it by pi / 2 because half of pi is 90 deg, so the dice will show a new face every time (the "+ 1" is a vertical transformation upward):
@@ -218,16 +201,47 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         dice.runAction(SCNAction.rotateBy(x: CGFloat(randomX * 10), y: 0, z: CGFloat(randomZ * 10), duration: 0.5))
     }
     
+    func addDice(at location: ARHitTestResult) {
+        //Initializes a new scene with the filepath of the dice object:
+        let diceScene = SCNScene(named: "art.scnassets/diceeColada copy.scn")
+        
+        /*Initializes the node of the dice object to the node of the dice object in the scene tree (NOTE: "recursively" parameter is a bool for whether or not you wnat to include every single other object in the tree for the scene):
+        */
+        if let diceNode = diceScene?.rootNode.childNode(withName: "Dice", recursively: true){
+        
+        /*Sets the diceNode's position as the position (which is the number 3 after ".columns") of the x, y, and z components of the hitTest result (NOTE: the radius of the diceNode is added to the y parameter, otherwise half of the dice object will be sunk into the plane instead of the dice appearing above the plane):
+        */
+            diceNode.position = SCNVector3(x: location.worldTransform.columns.3.x, y: (location.worldTransform.columns.3.y + diceNode.boundingSphere.radius), z: location.worldTransform.columns.3.z)
+            
+            //Appends the diceNode to the array of diceNodes:
+            diceArray.append(diceNode)
+            
+            //Adds the diceNode to the rootNode of the sceneView:
+            sceneView.scene.rootNode.addChildNode(diceNode)
+            
+            roll(dice: diceNode)
+    }
+    
+    //MARK: - ARSCNViewDelegate Methods:
+        
     /*This method is called when a node is added to the sceneView (NOTE: the "ARAnchor" is a position on a horizontal plane on which an AR object can be placed):
     */
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        //Checks if anchor is of type ARPlaneAnchor (this block prevents runtime errors):
-        if anchor is ARPlaneAnchor {
-            print("Plane detected.")
+        /*Checks if anchor is of type ARPlaneAnchor and exits the method with "return" keyword if it isn't (this block prevents runtime errors):
+        */
+        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+        
+        let planeNode = makePlane(with: planeAnchor)
             
-            /*If anchor is of type ARPlaneAnchor, downcasts planeAnchor constant as ARPlaneAnchor:
+            /*Uses the inputted node parameter of the method to insert the planeNode as a child node:
             */
-            let planeAnchor = anchor as! ARPlaneAnchor
+            node.addChildNode(planeNode)
+        }
+    }
+        
+    //MARK: - Plane Rendering:
+        func makePlane(with planeAnchor: ARPlaneAnchor) throws -> SCNNode {
+            print("Plane detected.")
             
             /*Initializes a new constant plane equal to a SCNPlane at the extent of planeAnchor at x and z positions (NOTE: do not use y for the second parameter, as height refers to the distance from the user):
             */
@@ -256,17 +270,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             //Sets the geometry of the planeNode to the plane object:
             planeNode.geometry = plane
             
-            /*Uses the inputted node parameter of the method to insert the planeNode as a child node:
-            */
-            node.addChildNode(planeNode)
-        } else {
-            //Exits the method if the plane isn't detected (this prevents runtime errors).
-            return
+            return planeNode
         }
-    }
 
     // MARK: - ARSCNViewDelegate
-    
 /*
     // Override to create and configure nodes for anchors added to the view's session.
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
@@ -290,4 +297,5 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
     }
+}
 }
