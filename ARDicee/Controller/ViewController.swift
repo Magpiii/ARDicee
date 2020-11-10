@@ -240,7 +240,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
         
     //MARK: - Plane Rendering:
-        func makePlane(with planeAnchor: ARPlaneAnchor) throws -> SCNNode {
+        func makePlane(with planeAnchor: ARPlaneAnchor) -> SCNNode {
             print("Plane detected.")
             
             /*Initializes a new constant plane equal to a SCNPlane at the extent of planeAnchor at x and z positions (NOTE: do not use y for the second parameter, as height refers to the distance from the user):
@@ -297,5 +297,4 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
     }
-}
 }
