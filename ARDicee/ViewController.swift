@@ -13,6 +13,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    //Init diceArray as empty array of SCNNode objects:
+    var diceArray = [SCNNode]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -65,7 +68,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.autoenablesDefaultLighting = true
         
         /*Creates a new Scene object as a sphere this time (NOTE: measurements are still in METERS):
-        */
+        
         let sphere = SCNSphere(radius: 0.2)
         
         //Assigns the material made above to the sphere:
@@ -88,6 +91,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             //Adds the diceNode to the rootNode of the sceneView:
             sceneView.scene.rootNode.addChildNode(safeDiceNode)
         }
+        */
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -120,14 +124,98 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
     
+    @IBAction func rollAgain(_ sender: UIBarButtonItem) {
+        //Rolls all dice once the barButton item is pressed:
+        rollAll()
+    }
+    
+    @IBAction func removeAllDice(_ sender: UIBarButtonItem) {
+        //If the diceArray isn't empty...
+        if !diceArray.isEmpty {
+            for dice in diceArray {
+                //Removes all dice from the parent node (in this case, the root node):
+                dice.removeFromParentNode()
+            }
+        }
+    }
+    
+    //This method is called after the user shakes the device:
+    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
+        //Rolls all dice if the user shakes the device (hey, that rhymes!):
+        rollAll()
+    }
+    
+    
     /*This method triggers when the user touches a location on the screen. The location is then converted into an AR location in the world:
     */
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         /*If we were using multitouch, we wouldn't use first here, but since we're only worried about one touch for this example, "touches.first" (which is the first detected touch in an array of detected touches) is optionally bound here:
         */
         if let touch = touches.first {
+            /*Init new constant touchLocation equal to the location touched in the AR sceneView:
+            */
+            let touchLoctaion = touch.location(in: sceneView)
+            
+            /*Init new constant "results" equal to the results of a "hitTest" (takes the 2D geometric data and transfers it to the 3D coordinates of where the tap would be in the real world using the camera):
+            */
+            let results = sceneView.hitTest(touchLoctaion, types: .existingPlaneUsingExtent)
+            
+            //If the hitTest succeeded and it found a position on an existing plane...
+            if !results.isEmpty {
+                print("Horizontal plane detected.")
+            } else {
+                print("Error code 1: no plane detected.")
+            }
+            
+            /*Optionally bind hitResult to the first element of the results array if the hitTest got a result:
+            */
+            if let hitResult = results.first{
+                print(hitResult)
+                
+                //Initializes a new scene with the filepath of the dice object:
+                let diceScene = SCNScene(named: "art.scnassets/diceeColada copy.scn")
+                
+                /*Initializes the node of the dice object to the node of the dice object in the scene tree (NOTE: "recursively" parameter is a bool for whether or not you wnat to include every single other object in the tree for the scene):
+                */
+                if let diceNode = diceScene?.rootNode.childNode(withName: "Dice", recursively: true){
+                
+                /*Sets the diceNode's position as the position (which is the number 3 after ".columns") of the x, y, and z components of the hitTest result (NOTE: the radius of the diceNode is added to the y parameter, otherwise half of the dice object will be sunk into the plane instead of the dice appearing above the plane):
+                */
+                    diceNode.position = SCNVector3(x: hitResult.worldTransform.columns.3.x, y: (hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius), z: hitResult.worldTransform.columns.3.z)
+                    
+                    //Appends the diceNode to the array of diceNodes:
+                    diceArray.append(diceNode)
+                    
+                    //Adds the diceNode to the rootNode of the sceneView:
+                    sceneView.scene.rootNode.addChildNode(diceNode)
+                    
+                    roll(dice: diceNode)
+        }
+    }
+}
+}
+            
+    func rollAll() {
+        //If diceArray isn't empty...
+        if !diceArray.isEmpty {
+            //Rolls each dice in the diceArray:
+            for dice in diceArray{
+                roll(dice: dice)
+            }
             
         }
+    }
+    
+    func roll(dice: SCNNode) {
+        /*Creates a new constant x equal to a random dice face between 1 and 4 and multiplies it by pi / 2 because half of pi is 90 deg, so the dice will show a new face every time (the "+ 1" is a vertical transformation upward):
+        */
+        let randomX = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
+        
+        let randomZ = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
+        
+        /*Makes the dice rotate using the predefined SCNAction "rotateBy" (y is 0 because it doesn't need to rotate on the y-axis, there would be no point); duration parameter is in seconds; randomX and randomZ are multiplied by 10 to make the animation go faster and look more badass:
+        */
+        dice.runAction(SCNAction.rotateBy(x: CGFloat(randomX * 10), y: 0, z: CGFloat(randomZ * 10), duration: 0.5))
     }
     
     /*This method is called when a node is added to the sceneView (NOTE: the "ARAnchor" is a position on a horizontal plane on which an AR object can be placed):
